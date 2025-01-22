@@ -61,13 +61,12 @@ class CreditCard extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                       const Text(
+                        const Text(
                           '\$10,250.00',
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white
-                          ),
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,

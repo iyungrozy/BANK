@@ -1,8 +1,45 @@
-import 'package:myapp/widgets/credit_card.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class MyCardPage extends StatelessWidget {
+class MyCardPage extends StatefulWidget {
   const MyCardPage({super.key});
+
+  @override
+  State<MyCardPage> createState() => _MyCardPageState();
+}
+
+class _MyCardPageState extends State<MyCardPage> {
+  List<Map<String, dynamic>> cards = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCardData();
+  }
+
+  Future<void> fetchCardData() async {
+    const String apiUrl = 'https://nibank.honjo.web.id/api/saldo';
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        setState(() {
+          cards = List<Map<String, dynamic>>.from(data['accounts']);
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      // Handle error accordingly
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +47,7 @@ class MyCardPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: IconButton.outlined(
+        leading: IconButton(
           onPressed: () {},
           icon: const Icon(
             Icons.arrow_back_ios_new,
@@ -22,228 +59,85 @@ class MyCardPage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w500),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              // BackCard
-              const BackCard(),
-              const SizedBox(height: 25),
-              // FrontCard
-              const FrontCard(),
-              const SizedBox(height: 30),
-              TextButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.add),
-                label: const Text(
-                  "Add new card",
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                  ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: cards.map((card) => CreditCard(card: card)).toList(),
                 ),
-                style: ElevatedButton.styleFrom(
-                  side: BorderSide(color: Colors.grey[100]!),
-                  fixedSize: const Size(double.maxFinite, 55),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)
-                  ),
-                  backgroundColor: Colors.grey[100],
-                  foregroundColor: Colors.black
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
+              ),
+            ),
     );
   }
 }
 
-class FrontCard extends StatelessWidget {
-  const FrontCard({super.key});
+class CreditCard extends StatelessWidget {
+  final Map<String, dynamic> card;
+
+  const CreditCard({required this.card, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: 240,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Column(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  color: const Color.fromARGB(255, 14, 19, 29),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 16,
-                        left: 16,
-                        child: Image.asset(
-                          "assets/credit-card.png",
-                          height: 40,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        left: 70,
-                        child: Image.asset(
-                          "assets/wifi.png",
-                          height: 50,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const Positioned(
-                        bottom: 16,
-                        left: 16,
-                        child: Text(
-                          "**** **** **** 1990",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      margin: const EdgeInsets.only(bottom: 20),
+      height: 180,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: const Color.fromARGB(255, 14, 19, 29),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              card['account_name'],
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              Expanded(
-                flex: 1,
-                child: Container(
-                  color: const Color.fromARGB(255, 16, 80, 98),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                             Text(
-                              'Anabella Angela',
-                              style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white
-                              ),
-                            ),
-                             Text(
-                              '9/23',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            CircleAvatar(
-                              radius: 15,
-                              backgroundColor: Colors.white.withOpacity(0.8),
-                            ),
-                            Transform.translate(
-                              offset: const Offset(-10, 0),
-                              child: CircleAvatar(
-                                radius: 15,
-                                backgroundColor: Colors.white.withOpacity(0.8),
-                              ),
-                            )
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ));
-  }
-}
-
-
-class BackCard extends StatelessWidget {
-  const BackCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 240,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: const Color.fromARGB(255, 14, 19, 29)),
-      child: Stack(
-        children: [
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: Image.asset(
-              "assets/card-design.png",
-              fit: BoxFit.cover,
-              width: 160,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 10),
+            Text(
+              "**** **** **** ${card['account_number'].substring(card['account_number'].length - 4)}",
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+              ),
+            ),
+            const Spacer(),
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Text(
+                  "Balance: Rp${card['available_balance'].toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
                 Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 15,
-                          backgroundColor: Colors.white.withOpacity(0.8),
-                        ),
-                        Transform.translate(
-                          offset: const Offset(-10, 0),
-                          child: CircleAvatar(
-                            radius: 15,
-                            backgroundColor: Colors.white.withOpacity(0.8),
-                          ),
-                        )
-                      ],
+                    CircleAvatar(
+                      radius: 15,
+                      backgroundColor: Colors.white.withOpacity(0.8),
                     ),
-                  ],
-                ),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "**** **** **** 1990",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                    Transform.translate(
+                      offset: const Offset(-10, 0),
+                      child: CircleAvatar(
+                        radius: 15,
+                        backgroundColor: Colors.white.withOpacity(0.8),
                       ),
-                    ),
-                    Text(
-                      "9/23",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
-                      ),
-                    ),
+                    )
                   ],
-                ),
-                const Text(
-                  "Anabella Angela",
-                  style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }
