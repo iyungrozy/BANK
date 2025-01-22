@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../pages/top_up.dart';
 import '../pages/transfer_money.dart';
 
 class ActionButtons extends StatelessWidget {
@@ -21,7 +21,12 @@ class ActionButtons extends StatelessWidget {
             ActionButton(
               icon: Icons.account_balance,
               label: 'Deposit',
-              onPressed: (){},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TopUpPage()),
+                );
+              },
             ),
             ActionButton(
               icon: Icons.swap_horiz,
