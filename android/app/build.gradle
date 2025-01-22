@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "id.web.honjoo.nibank"
+    namespace = "com.example.myapp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
